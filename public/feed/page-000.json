@@ -1,0 +1,88 @@
+[
+  {
+    "id": "1381854028232193089",
+    "src": "public/videos/1381854028232193089.mp4",
+    "poster": "public/posters/1381854028232193089.jpg",
+    "author": "@nova",
+    "caption": "no because why is this so real",
+    "likes": 14904,
+    "duration": 7.55,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "2466797579047759691",
+    "src": "public/videos/2466797579047759691.mp4",
+    "poster": "public/posters/2466797579047759691.jpg",
+    "author": "@driftwood",
+    "likes": 16793,
+    "duration": 7.83,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "2635594312504430960",
+    "src": "public/videos/2635594312504430960.mp4",
+    "poster": "public/posters/2635594312504430960.jpg",
+    "author": "@nova",
+    "caption": "tell me you relate without telling me",
+    "likes": 52928,
+    "duration": 8.62,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "425148686832983381",
+    "src": "public/videos/425148686832983381.mp4",
+    "poster": "public/posters/425148686832983381.jpg",
+    "author": "@mika",
+    "caption": "day 1 of posting until it works",
+    "likes": 49732,
+    "duration": 9.3,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "6974447037748169156",
+    "src": "public/videos/6974447037748169156.mp4",
+    "poster": "public/posters/6974447037748169156.jpg",
+    "author": "@driftwood",
+    "caption": "the vibes are immaculate ✨",
+    "likes": 87993,
+    "duration": 35.55,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "3698940505591559678",
+    "src": "public/videos/3698940505591559678.mp4",
+    "poster": "public/posters/3698940505591559678.jpg",
+    "author": "@echo",
+    "likes": 28399,
+    "duration": 14.75,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "3746059563046546718",
+    "src": "public/videos/3746059563046546718.mp4",
+    "poster": "public/posters/3746059563046546718.jpg",
+    "author": "@nova",
+    "caption": "day 1 of posting until it works",
+    "likes": 79424,
+    "duration": 7.78,
+    "width": 540,
+    "height": 960
+  },
+  {
+    "id": "6702137189532704568",
+    "src": "public/videos/6702137189532704568.mp4",
+    "poster": "public/posters/6702137189532704568.jpg",
+    "author": "@driftwood",
+    "caption": "POV: the algorithm found you 👀",
+    "likes": 79929,
+    "duration": 11.36,
+    "width": 540,
+    "height": 960
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "name": "vertical-video-feed",
+  "version": "1.0.0",
+  "description": "Vertical short-video feed (TikTok/Reels style) in vanilla JavaScript — no frameworks, no bundler, no runtime dependencies.",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve .",
+    "build:feed": "node scripts/build-feed.mjs",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check --write .",
+    "test": "node --test tests/*.test.js",
+    "typecheck": "tsc -p jsconfig.json --noEmit",
+    "prepare": "husky"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,mjs,json,jsonc,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.2",
+    "@types/node": "^26.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "typescript": "^5.9.3"
+  }
+}

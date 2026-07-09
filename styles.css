@@ -1,0 +1,282 @@
+/*
+ * Minimal styling (visuals are explicitly not graded). What matters here is the
+ * mechanics: the snap container, the permanent cell grid + spacer, the recycled
+ * transform-positioned slides, and compositor-only animation. See ARCHITECTURE.md.
+ */
+
+:root {
+  /* Published by core/viewport.js from the MEASURED container height in px.
+     Never dvh/vh — pixel geometry keeps snap points integer-aligned. */
+  --slide-h: 100dvh; /* bootstrap value; JS overwrites with measured px immediately */
+  --accent: #fe2c55;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The `hidden` attribute must always win over an element's own `display` value —
+   otherwise hidden overlays (spinner/error/boot) keep intercepting pointer events. */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  background: #000;
+  color: #fff;
+  font: 15px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  overflow: hidden; /* the feed scrolls, not the page */
+}
+
+/* ── Scroll container ─────────────────────────────────────────────────────── */
+.feed {
+  position: relative;
+  height: 100dvh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain; /* no pull-to-refresh / scroll chaining */
+  scrollbar-width: none; /* Firefox */
+  outline: none;
+  touch-action: pan-y;
+}
+.feed::-webkit-scrollbar {
+  display: none;
+}
+
+/* Desktop: center a phone-width column, letterbox the sides. */
+@media (min-width: 700px) {
+  .feed {
+    max-width: min(480px, calc(100dvh * 9 / 16));
+    margin-inline: auto;
+  }
+}
+
+/* ── The permanent snap grid (also the scrollbar spacer) ──────────────────── */
+.feed__cells {
+  position: relative;
+}
+.cell {
+  width: 100%;
+  height: var(--slide-h);
+  scroll-snap-align: start;
+  scroll-snap-stop: always; /* one video per fling */
+}
+
+/* ── Recycled paint layer ─────────────────────────────────────────────────── */
+/* `display: contents` removes this wrapper's own box, so each `.slide`'s
+   containing block becomes #feed and the slides scroll WITH the content (the
+   standard virtual-list technique). */
+.feed__slides {
+  display: contents;
+}
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--slide-h);
+  /* Placement is transform-only (compositor). translate3d set by the Virtualizer. */
+  transform: translate3d(0, 0, 0);
+  will-change: transform; /* bounded: only the 9 pooled slides get a layer */
+  contain: content; /* isolate layout/paint per slide */
+  scroll-snap-align: none; /* snapping is owned by .cell, never the slide */
+  background: #0a0a0a;
+  overflow: hidden;
+}
+
+.slide__poster,
+.slide__video video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #0a0a0a;
+}
+.slide__video {
+  position: absolute;
+  inset: 0;
+}
+/* Video fades in over the poster once it actually starts painting → no white flash.
+   Visible in BOTH playing and user-paused states ([data-playing] matches either) —
+   a pause must freeze the current frame, not jump back to the frame-0 poster.
+   Only the neutral state (attribute absent: poster-only slide) hides it. */
+.slide__video video {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.slide[data-playing] .slide__video video {
+  opacity: 1;
+}
+
+/* ── Progress bar (its own compositor transform, scaleX only) ─────────────── */
+.slide__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--accent);
+  z-index: 3;
+}
+
+/* ── Play/pause tap layer + icon ──────────────────────────────────────────── */
+.slide__playpause {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+}
+.slide[data-playing='false'] .slide__playpause::after {
+  content: '▶';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-size: 64px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Double-tap heart burst ───────────────────────────────────────────────── */
+/* Only the resting state lives here. The burst keyframes are defined ONCE, in
+   ActionsOverlay.burst() (Web Animations API), which also honors reduced motion. */
+.slide__heart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 96px;
+  color: var(--accent);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.3);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ── Overlay: meta + action rail ──────────────────────────────────────────── */
+/* Hidden until the slide has real data: the bottom-anchored overlay grows when
+   the caption arrives, and a *visible* box growing counts as CLS. */
+.slide[data-pending] .slide__overlay {
+  visibility: hidden;
+}
+.slide__overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 12px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+  z-index: 2;
+}
+.slide__meta {
+  flex: 1;
+  min-width: 0;
+}
+.slide__author {
+  font-weight: 700;
+}
+.slide__caption {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.slide__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+.action {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+}
+.action__icon {
+  font-size: 30px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+.action__count {
+  font-size: 12px;
+}
+.action[data-action='like'][aria-pressed='true'] .action__icon {
+  color: var(--accent);
+}
+
+/* ── Per-slide loading / error states ─────────────────────────────────────── */
+.slide__spinner,
+.slide__error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 12px;
+  text-align: center;
+  z-index: 3;
+}
+.slide__error button {
+  padding: 8px 20px;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+.spinner,
+.boot__spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ── Boot overlay ─────────────────────────────────────────────────────────── */
+/* Hiding relies on the global `[hidden] { display: none !important; }`. */
+.boot {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  background: #000;
+  z-index: 10;
+}
+.boot__spinner {
+  width: 40px;
+  height: 40px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The heart burst is handled in JS (ActionsOverlay checks the same query). */
+  .slide__video video {
+    transition: none;
+  }
+}

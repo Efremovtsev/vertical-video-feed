@@ -1,0 +1,23 @@
+# Dependencies (this project has none at runtime; npx pulls dev tools on demand)
+node_modules/
+
+# Local dev workspace files (editor/assistant config — not part of the app)
+.mcp.json
+.claude/
+.claudeignore
+CLAUDE.md
+
+# The employer's task brief — not for the public repo
+Frontend Developer. Test Case.pdf
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# Build pipeline scratch
+scripts/.cache/
+
+# NOTE: public/videos/ and public/posters/ ARE committed on purpose — the app is
+# meant to be self-contained (see ARCHITECTURE.md §4). If the media is large,
+# track it with Git LFS rather than ignoring it.

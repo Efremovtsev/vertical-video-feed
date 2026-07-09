@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "app/*": ["src/*"],
+      "core/*": ["src/core/*"],
+      "engine/*": ["src/engine/*"],
+      "data/*": ["src/data/*"],
+      "media/*": ["src/media/*"],
+      "view/*": ["src/view/*"],
+      "input/*": ["src/input/*"]
+    }
+  },
+  "include": ["src/**/*.js", "scripts/**/*.mjs", "tests/**/*.js"]
+}

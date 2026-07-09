@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <title>Vertical Video Feed</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%B9%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+
+    <!-- Import map: clean module specifiers with no bundler (native browser feature). -->
+    <script type="importmap">
+      {
+        "imports": {
+          "app/": "./src/",
+          "core/": "./src/core/",
+          "engine/": "./src/engine/",
+          "data/": "./src/data/",
+          "media/": "./src/media/",
+          "view/": "./src/view/",
+          "input/": "./src/input/"
+        }
+      }
+    </script>
+
+    <!-- The module graph is static and known, so preload it all: without these
+         hints the browser discovers imports level by level (~3 sequential RTTs).
+         The manifest JSONs are fetched on boot — start them downloading too. -->
+    <link rel="modulepreload" href="./src/main.js" />
+    <link rel="modulepreload" href="./src/FeedController.js" />
+    <link rel="modulepreload" href="./src/core/EventBus.js" />
+    <link rel="modulepreload" href="./src/core/RafScheduler.js" />
+    <link rel="modulepreload" href="./src/core/viewport.js" />
+    <link rel="modulepreload" href="./src/engine/WindowCalculator.js" />
+    <link rel="modulepreload" href="./src/engine/Virtualizer.js" />
+    <link rel="modulepreload" href="./src/data/FeedService.js" />
+    <link rel="modulepreload" href="./src/data/LikesStore.js" />
+    <link rel="modulepreload" href="./src/data/manifest.js" />
+    <link rel="modulepreload" href="./src/media/VideoPool.js" />
+    <link rel="modulepreload" href="./src/media/PlaybackController.js" />
+    <link rel="modulepreload" href="./src/view/SlideView.js" />
+    <link rel="modulepreload" href="./src/view/ActionsOverlay.js" />
+    <link rel="modulepreload" href="./src/input/GestureController.js" />
+    <link rel="modulepreload" href="./src/input/KeyboardController.js" />
+    <!-- crossorigin: aligns the preload's credentials mode with fetch()'s
+         default, otherwise the browser refuses to reuse the preloaded bytes. -->
+    <link rel="preload" href="./public/feed/index.json" as="fetch" crossorigin />
+    <link rel="preload" href="./public/feed/page-000.json" as="fetch" crossorigin />
+  </head>
+  <body>
+    <!--
+      Scroll container. Holds a permanent grid of empty `.cell` snap targets
+      (created by the Virtualizer — they double as the scrollbar spacer) plus a
+      small pool of recycled `.slide` nodes cloned from the template below and
+      positioned purely with `transform`. See ARCHITECTURE.md §1.1.
+    -->
+    <main id="feed" class="feed" tabindex="0" aria-label="Video feed" aria-roledescription="carousel">
+      <div id="cells" class="feed__cells" aria-hidden="true"></div>
+      <div id="slides" class="feed__slides"></div>
+    </main>
+
+    <!-- Boot / empty state overlay. -->
+    <div id="boot" class="boot">
+      <div class="boot__spinner" role="status" aria-label="Loading"></div>
+    </div>
+
+    <!-- One recycled slide. No <video> here — the VideoPool attaches one into
+         `.slide__video` only for the active + warm slides. -->
+    <template id="slide-template">
+      <section class="slide" data-pending="true" aria-roledescription="slide">
+        <img class="slide__poster" alt="" decoding="async" />
+        <div class="slide__video"></div>
+        <div class="slide__progress"></div>
+
+        <div class="slide__spinner" hidden><span class="spinner"></span></div>
+        <div class="slide__error" hidden>
+          <p>Couldn't load this video.</p>
+          <button type="button" data-action="retry">Retry</button>
+        </div>
+
+        <!-- The play surface is driven by the tap/double-tap logic in
+             GestureController, not by data-action click delegation. -->
+        <button type="button" class="slide__playpause" aria-label="Play or pause"></button>
+
+        <div class="slide__heart" aria-hidden="true">♥</div>
+
+        <div class="slide__overlay">
+          <div class="slide__meta">
+            <span class="slide__author"></span>
+            <p class="slide__caption"></p>
+          </div>
+          <div class="slide__actions">
+            <button type="button" class="action" data-action="like" aria-pressed="false" aria-label="Like">
+              <span class="action__icon">♥</span>
+              <span class="action__count" data-role="like-count"></span>
+            </button>
+            <button type="button" class="action" data-action="comment" aria-label="Comments">
+              <span class="action__icon">💬</span>
+            </button>
+            <button type="button" class="action" data-action="share" aria-label="Share">
+              <span class="action__icon">↗</span>
+            </button>
+            <button type="button" class="action" data-action="mute" aria-label="Toggle sound">
+              <span class="action__icon" data-role="mute-icon">🔇</span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

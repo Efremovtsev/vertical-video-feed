@@ -1,0 +1,2 @@
+# Lint + format staged files, type-check the whole project, run the unit tests.
+npx lint-staged && npm run typecheck && npm test
